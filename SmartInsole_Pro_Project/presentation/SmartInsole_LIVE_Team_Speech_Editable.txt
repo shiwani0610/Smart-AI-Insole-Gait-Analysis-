@@ -1,0 +1,204 @@
+SMART INSOLE LIVE ESP32 - TEAM SPEECH AND DASHBOARD GUIDE
+
+
+PRIYANSHU BHARTI  •  10%  •  VERY EASY
+Slide 1 - Opening (~50 seconds)
+
+Good morning respected sir and all the teachers. Our team is presenting the Engineering Clinics project, Smart Insole AI Gait Analysis.
+
+Gait means the way a person walks. Our project uses sensors inside a shoe insole to observe foot pressure and movement. The dashboard shows these readings as simple graphs and walking-pattern information.
+
+Our project is a student research prototype. It is not a medical diagnosis device.
+
+Our team members are Priyanshu, Shiwani, Rohan and Shivam. Now Shiwani will explain the problem and project objectives.
+
+Remember: Priyanshu only needs to remember: gait = the way we walk; smart insole = pressure + movement sensors.
+
+
+SHIWANI SHREYA  •  25%  •  MEDIUM
+Slide 2 - Problem and objectives
+
+Thank you, Priyanshu. Walking patterns can change gradually, and it is difficult to understand these changes just by looking at someone. Specialised gait-analysis systems can be expensive and are not always easily available.
+
+A pressure sensor tells us about force-related loading at one position. A motion sensor tells us how the foot moves. We combine both types of information to get a better basic picture.
+
+Our objectives are to collect heel, midfoot and toe readings, read acceleration and angular movement, identify repeated foot-contact events, and display easy-to-understand results through a browser dashboard.
+
+
+SHIWANI SHREYA  •  25%  •  MEDIUM
+Slide 3 - Our complete solution
+
+Our project has four parts. First, three FSR sensors at the heel, midfoot and toe measure relative pressure. Second, MPU6050 gives movement data using its accelerometer and gyroscope.
+
+Third, ESP32 collects the sensor readings. It sends a numeric stream over USB at 115200 baud. Fourth, the dashboard receives the data, updates the sensor values, and estimates gait features. It also contains an experimental trained Random Forest model.
+
+The dashboard supports actual USB live readings, recorded CSV files and clearly marked synthetic demo examples. Now Rohan will explain the circuit, architecture and gait algorithm.
+
+Remember: Handover: Now Rohan will explain how the sensor data travels from the insole to the analysis dashboard.
+
+
+ROHAN KUMAR  •  35%  •  TECHNICAL
+Slide 4 - Sensors, pins and acquisition
+
+Thank you, Shiwani. The main components are the ESP32, three FSRs and an MPU6050. An FSR is a Force Sensitive Resistor, whose resistance changes under force. Each FSR uses a voltage-divider circuit with a 10-kilo-ohm resistor.
+
+We use ESP32 analogue GPIO 34 for heel, GPIO 35 for midfoot and GPIO 32 for toe. These values are raw ADC measurements, not calibrated force in newtons.
+
+The MPU6050 has three acceleration axes and three gyroscope axes. It communicates over I-squared-C with SDA on GPIO 21 and SCL on GPIO 22. The board uses 3.3-volt logic, so we must not connect 5 volts to the GPIO pins.
+
+
+ROHAN KUMAR  •  35%  •  TECHNICAL
+Slide 5 - Updated live system architecture
+
+Please look at our updated architecture. There are five steps: sensor measurement, ESP32 data acquisition, local serial bridge, browser streaming, and gait-analysis dashboard.
+
+The ESP32 sends ten comma-separated columns: timestamp, heel, midfoot, toe, acceleration X/Y/Z and gyroscope X/Y/Z. The Python bridge opens the correct USB serial port at 115200 baud and validates each numeric row.
+
+The bridge then delivers new packets to the browser using Server-Sent Events. This means the dashboard can update continuously while hardware measurements arrive; no manual CSV import is needed for live mode.
+
+For the present demonstration, the physical ESP32 has already shown real serial output and our earlier recorder saved 1,201 valid rows. The new live bridge has been software-tested using a simulated serial stream; the final end-to-end test on this physical laptop still needs to be confirmed.
+
+
+ROHAN KUMAR  •  35%  •  TECHNICAL
+Slide 6 - Working methodology and gait phases
+
+The software first reads incoming samples. The FSR sensors can have a non-zero idle reading, so the user can keep the insole stationary and press Calibrate idle baseline. This allows the analysis to subtract resting sensor offsets for gait-event detection, while still displaying the original ADC values.
+
+Next, it observes changes in corrected pressure. A clear foot contact can begin a gait event, and the pressure falling again can mark release. Repeated events allow us to estimate same-foot gait cycle duration.
+
+We estimate cadence from 120 divided by same-foot cycle duration in seconds, assuming alternating steps. We also calculate an approximate stance/swing ratio, pressure transfer and cycle timing variability.
+
+When the pressure signal is weak, the dashboard says insufficient data instead of inventing a walking prediction. This matters because standing or pressing a sensor once is not enough to calculate gait cadence.
+
+
+ROHAN KUMAR  •  35%  •  TECHNICAL
+Slide 7 - Trained machine learning model
+
+We trained a Random Forest classifier in Python using Scikit-learn. It contains 36 decision trees and uses 440 generated synthetic gait examples, with 330 for training and 110 for a synthetic test split.
+
+The input features include estimated cadence, cycle duration, stance percentage, timing variability, pressure-zone distribution and event flags. The output is steady-like or irregular-like according to the synthetic training patterns.
+
+The trained tree logic was exported to JavaScript, so predictions run inside the browser without a separate model server.
+
+However, synthetic test performance is not evidence of accuracy on actual humans. The current model has not been clinically validated, and it does not detect diseases. Now Shivam will demonstrate the live dashboard and testing.
+
+Remember: If the examiner asks about 100% test accuracy: that number comes only from simple generated synthetic examples; do not claim real-world accuracy.
+
+
+SHIVAM RASTOGI  •  30%  •  DEMO
+Slide 8 - Live dashboard demonstration
+
+Thank you, Rohan. This is our SmartInsole AI dashboard. I will show the direct USB workflow.
+
+First, I close the Arduino Serial Monitor, because only one program can control the serial port at a time. Then I run START_LIVE_MAC.command. It starts the local Python serial bridge and opens the dashboard at http://127.0.0.1:8765/index.html.
+
+On the Live ESP32 USB page, we can see the actual connected port, baud rate, sample counter and last received raw line. Heel, midfoot and toe numbers are updated automatically from incoming ESP32 packets. The MPU6050 acceleration and gyroscope channels appear beside them.
+
+I now keep the insole still and select Calibrate idle baseline. After creating repeated foot-contact movements, the dashboard tries to estimate gait phase, contact count, cadence, timing consistency and the experimental Random Forest class.
+
+If there are too few walking cycles or insufficient pressure variation, it correctly shows that data is insufficient. We can also export the real stream as CSV, save a session, compare against a baseline and view reports. The Steady and Irregular sample buttons are separate simulated examples, not live sensor measurements.
+
+
+SHIVAM RASTOGI  •  30%  •  DEMO
+Slide 9 - Testing results and limitations
+
+In our Arduino Serial Monitor, the ESP32 produced changing numeric sensor readings at 115200 baud. Our terminal recorder captured 1,201 valid sensor samples over 30 seconds, which verifies that the hardware can send serial data to the Mac.
+
+The new serial-to-browser bridge was tested with a controlled serial data feed, including live packet delivery, graphs and export. We still need to confirm this newly integrated bridge with the physical ESP32 on the demonstration laptop.
+
+The FSR values have not been converted into physical pressure units. The Random Forest is trained only on synthetic data. One insole cannot reliably measure left-right gait symmetry, and our project does not diagnose any medical condition.
+
+
+SHIVAM RASTOGI  •  30%  •  DEMO
+Slide 10 - Future scope and closing
+
+Our future improvements are to validate this new live connection on physical hardware, collect labelled walking data from volunteers, calibrate the FSR channels, and train and evaluate the model using real recorded walking sessions.
+
+In conclusion, we have integrated a smart insole sensing concept, real ESP32 serial acquisition, a local live streaming interface, explainable gait analysis and an experimental machine learning model into one dashboard.
+
+Thank you, sir. We are ready for your questions.
+
+Remember: Recommended last sentence if bridge is connected during inspection: We are now receiving fresh hardware sensor readings in our dashboard. If the bridge fails on-site, show the recorded CSV and explain the failure honestly.
+
+1. Close Arduino Serial Monitor — Only one application can own the USB serial port at once.
+
+2. Extract the ZIP fully — Keep index.html, live_server.py, js, css, training and hardware folders together.
+
+3. Double-click START_LIVE_MAC.command — Or open Terminal in the project folder and run: bash START_LIVE_MAC.command
+
+4. Open http://127.0.0.1:8765/index.html — This is the local bridge-hosted address, not file:// and not Arduino IDE.
+
+5. Select sidebar Live ESP32 USB — If necessary, choose /dev/cu.usbserial-A5069RR4 and click Connect port.
+
+6. Check increasing RECEIVED and changing FSR/IMU — Show heel, midfoot, toe and ax/ay/az/gx/gy/gz to prove fresh numeric input.
+
+7. Keep foot still and click Calibrate idle — Capture a quiet offset; then gently apply rhythmic pressure or walk only when wired safely.
+
+8. Observe gait timing and ML — Wait for multiple complete foot contacts; insufficient data is a valid honest result.
+
+9. Click Export live CSV / Save session — Store actual collected sensor rows and the derived analysis summary.
+
+10. Open Reports & compare — Show baseline comparison and sample/analysis exports.
+
+What is gait?
+The manner/pattern in which someone walks.
+
+Why FSR sensors?
+They show relative loading at heel, midfoot and toe; not calibrated force.
+
+Why MPU6050?
+It supplies accelerometer and gyroscope context for foot motion.
+
+Why ESP32?
+It reads FSR ADC channels and MPU6050 I²C measurements, then sends numeric serial rows.
+
+Which serial baud rate?
+115200. Firmware outputs time_s,heel,midfoot,toe,ax,ay,az,gx,gy,gz.
+
+How is the dashboard live now?
+Python opens USB serial and forwards validated rows over Server-Sent Events to the browser.
+
+Is the live hardware fully verified?
+Original serial acquisition is verified, and bridge/UI were separately software-tested; physical end-to-end test of the new combined version remains pending.
+
+What is idle calibration?
+It estimates baseline ADC values while the insole is stationary, so changes can indicate pressure contact.
+
+What is cadence?
+Estimated steps per minute from same-foot gait cycles; with one insole we assume alternating steps.
+
+Why does it show insufficient data?
+Too few valid contact cycles or inadequate FSR variation; reporting a number would be misleading.
+
+Which ML model?
+Synthetic-trained 36-tree Random Forest with 10 gait features.
+
+How many training samples?
+440 generated synthetic examples, including a 110-sample synthetic holdout split.
+
+What if ML gives a very high score?
+It is a synthetic-pattern class score, not disease probability or clinical accuracy.
+
+Can it detect Parkinson’s?
+No. No disease-labelled real training or medical validation exists.
+
+How do you save data?
+Export live sensor CSV; session metrics also save locally in the browser.
+
+Can it calculate left vs right balance?
+No, a single three-zone insole cannot measure both feet accurately.
+
+What if the live port is busy?
+Close Arduino Serial Monitor and any Python recorder holding the same USB port.
+
+• ESP32 connected with USB data cable; Arduino Monitor successfully displays changing data.
+
+• Arduino Serial Monitor closed before launching bridge.
+
+• Run START_LIVE_MAC.command; localhost dashboard opens.
+
+• Live count increments; pressing FSR changes appropriate channel; tilting MPU6050 changes axes.
+
+• Calibrate idle; create several repeated contact cycles; check whether classification becomes available.
+
+• Keep PPT, PPT PDF, speech PDF, real data CSV and a charger offline as backups.

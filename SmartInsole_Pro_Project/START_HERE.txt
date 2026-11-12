@@ -1,0 +1,25 @@
+SMARTINSOLE AI — LIVE ESP32 PROJECT (2026-11-03)
+
+YOU NO LONGER NEED TO IMPORT walk1.csv FOR LIVE DATA.
+
+MAC:
+1) Connect ESP32 USB cable; close Arduino Serial Monitor / stop old recorder.
+2) Open Terminal in this extracted SmartInsole_Pro_Project folder.
+3) Run: bash START_LIVE_MAC.command
+4) Chrome: http://127.0.0.1:8765/index.html
+5) Sidebar: LIVE ESP32 USB. Verify sample count grows and actual values change.
+6) Keep insole idle, click Calibrate idle baseline, then gently create repeated contacts.
+7) See gait estimates and synthetic-trained RF result when enough real events are present.
+8) Export live CSV / save session / reports & compare.
+
+The latest PPT (10 slides), PDF and four-person speech PDF are in presentation/.
+
+IMPORTANT: The user's Arduino serial and 1,201-row recording were confirmed.
+This NEW live USB bridge was software-tested with controlled serial samples.
+It still needs physical ESP32 end-to-end confirmation on the Mac.
+AI was trained ONLY on synthetic gait examples; not a clinical model.
+
+If you simply double-click index.html without starting the bridge,
+the webpage falls back to the SIMULATED offline demo. Use the local URL above.
+
+See README.md for full step-by-step instructions.

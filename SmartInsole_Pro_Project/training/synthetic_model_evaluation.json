@@ -1,0 +1,33 @@
+{
+  "title": "Synthetic-trained Random Forest (EDUCATIONAL ONLY)",
+  "training_source": "440 algorithm-generated synthetic gait recordings; no human, patient or physical-sensor training data",
+  "feature_names": [
+    "cadence",
+    "cycle_s",
+    "stance_pct",
+    "consistency_index",
+    "timing_cv_pct",
+    "heel_to_toe_pct",
+    "heel_share",
+    "midfoot_share",
+    "toe_share",
+    "alerts"
+  ],
+  "classes": [
+    "synthetic steady-like",
+    "synthetic irregular-like"
+  ],
+  "synthetic_test_samples": 110,
+  "synthetic_holdout_accuracy": 1.0,
+  "synthetic_confusion_matrix": [
+    [
+      55,
+      0
+    ],
+    [
+      0,
+      55
+    ]
+  ],
+  "limitation": "Synthetic split accuracy is NOT an estimate of real-world gait accuracy."
+}
